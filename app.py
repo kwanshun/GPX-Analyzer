@@ -35,9 +35,7 @@ with st.sidebar:
         "Or choose an example from the /data folder:",
         options
     )
-
     gpx_data = None
-
     if selected_example != "---":
         example_path = os.path.join(data_dir, selected_example)
         with open(example_path, "r", encoding="utf-8") as f:
@@ -49,7 +47,7 @@ with st.sidebar:
         except Exception as e:
             st.error(f"❌ Error decoding GPX: {e}")
 
-# Parse and reduce only once
+
 df_reduced, stats = None, None
 if gpx_data:
     try:

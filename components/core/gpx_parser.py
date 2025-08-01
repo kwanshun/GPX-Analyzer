@@ -37,7 +37,6 @@ def parse_gpx(gpx_content, max_points_per_km=20):
 
     df = reduce_points_by_density(df, max_points_per_km)
 
-    # Recompute distances after reduction
     coords = df[["lat", "lon"]].to_numpy()
     distances = np.array(
         [
