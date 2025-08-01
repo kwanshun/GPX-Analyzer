@@ -10,7 +10,7 @@ def get_smoothed_grade(df):
 
 def update_plot_elevation_colored_by_slope(
     df, climbs_df=None, descents_df=None, color_by_slope=True, simplified=False
-):
+, show_markers=True):
     st.markdown("*Slope smoothed over ~300 meters*")
     df = apply_slope_smoothing(df)
 
