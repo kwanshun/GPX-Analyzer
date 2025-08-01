@@ -19,7 +19,7 @@ def update_plot_elevation_colored_by_slope(
     if simplified:
         _draw_simplified_segments(ax, df, climbs_df, descents_df)
     else:
-        _draw_detailed_colored_profile(ax, df, climbs_df, descents_df, color_by_slope)
+        _draw_detailed_colored_profile(ax, df, climbs_df, descents_df, color_by_slope, show_markers)
 
     ax.set_xlabel("Distance [km]")
     ax.set_ylabel("Elevation [m]")
@@ -43,17 +43,30 @@ def _draw_simplified_segments(ax, df, climbs_df, descents_df):
                 )
 
 
-def _draw_detailed_colored_profile(ax, df, climbs_df, descents_df, color_by_slope):
+def _draw_detailed_colored_profile(ax, df, climbs_df, descents_df, color_by_slope, show_markers):
     for i in range(1, len(df)):
         x = df["distance"].iloc[i - 1 : i + 1] / 1000
         y = df["ele"].iloc[i - 1 : i + 1]
-        color = get_color(df["plot_grade"].iloc[i]) if color_by_slope else "#999999"
+        color = get_color_from_palette(df["plot_grade"].iloc[i]) if color_by_slope else "#999999"
         ax.fill_between(x, 0, y, color=color, alpha=0.8)
 
-    # Optional: mark climbs and descents
-    for segment_df, color in [(climbs_df, "black"), (descents_df, "blue")]:
-        if segment_df is not None:
-            for _, row in segment_df.iterrows():
+    # --- LÓGICA MODIFICADA ---
+    # Envuelve el bloque que dibuja las líneas en una condición
+    if show_markers:
+        for segment_df, color, label in [(climbs_df, "black", "Climbs"), (descents_df, "blue", "Descents")]:
+            if segment_df is not None and not segment_df.empty:
+                # Dibuja la primera línea con etiqueta para la leyenda de matplotlib
+                row = segment_df.iloc[0]
                 style = "--" if color == "black" else ":"
-                ax.axvline(x=row["start_km"], color=color, linestyle=style, alpha=0.6)
+                ax.axvline(x=row["start_km"], color=color, linestyle=style, alpha=0.6, label=label)
                 ax.axvline(x=row["end_km"], color=color, linestyle=style, alpha=0.6)
+                
+                # Dibuja el resto sin etiqueta
+                for _, row in segment_df.iloc[1:].iterrows():
+                    ax.axvline(x=row["start_km"], color=color, linestyle=style, alpha=0.6)
+                    ax.axvline(x=row["end_km"], color=color, linestyle=style, alpha=0.6)
+        
+        # Activa la leyenda en el gráfico
+        if (climbs_df is not None and not climbs_df.empty) or \
+           (descents_df is not None and not descents_df.empty):
+            ax.legend()

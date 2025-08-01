@@ -17,7 +17,7 @@ from components.ui.segment_details import show_segment_summary_and_details
 from components.ui.stats_panel import show_stats
 from utils.gps_signal_analysis import run_gps_signal_analysis
 
-st.set_page_config(layout="wide", page_title="GPX Analyzer! 📍")
+st.set_page_config(layout="wide", page_title="GPX Analyzer 📍")
 
 # ───────────────────────── GPX INPUT
 with st.sidebar:
@@ -56,7 +56,6 @@ with st.sidebar:
         help="Lenient: Detects more, shorter climbs. Strict: Detects only the most significant climbs."
     )
 
-    # Definimos los parámetros según el modo
     if detection_mode == "Lenient":
         params = {"max_pause_length_m": 400, "max_pause_descent_m": 20, "start_threshold_slope": 1.5}
     elif detection_mode == "Balanced":
@@ -126,12 +125,18 @@ with tab1:
 
         with col2:
             st.subheader("📈 Elevation Profile")
+            show_markers = st.checkbox(
+                "Show climb/descent markers on profile", 
+                value=True,
+                help="Show or hide the vertical dashed lines that mark the start and end of detected segments."
+            )
             update_plot_elevation_colored_by_slope(
                 df_reduced,
                 climbs_df=climbs_df,
                 descents_df=descents_df,
                 color_by_slope=True,
                 simplified=False,
+                show_markers=show_markers
             )
             t.log("Rendered elevation chart")
             st.subheader("📊 Statistics")

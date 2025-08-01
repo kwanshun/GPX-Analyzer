@@ -1,18 +1,48 @@
+# components/ui/legend.py
 from streamlit.components.v1 import html
-
 
 def display_legend():
     legend_html = """
-    <div style='padding:10px; background:white; border-radius:8px; font-size:14px;
-                box-shadow: 0 0 8px rgba(0,0,0,0.2); width: fit-content;'>
-        <b>Legend: Gradient (%)</b><br>
-        <div><span style='background:#8B0000; width:20px; display:inline-block;'>&nbsp;</span> ≥ 18%</div>
-        <div><span style='background:#FF8C00; width:20px; display:inline-block;'>&nbsp;</span> 10–17%</div>
-        <div><span style='background:#FFFF00; width:20px; display:inline-block;'>&nbsp;</span> 2–9%</div>
-        <div><span style='background:#ADFF2F; width:20px; display:inline-block;'>&nbsp;</span> 0–1%</div>
-        <div><span style='background:#ADD8E6; width:20px; display:inline-block;'>&nbsp;</span> -1 to -2%</div>
-        <div><span style='background:#0000FF; width:20px; display:inline-block;'>&nbsp;</span> -3 to -10%</div>
-        <div><span style='background:#00008B; width:20px; display:inline-block;'>&nbsp;</span> < -10%</div>
+    <div style='padding:10px; background-color:rgba(255,255,255,0.8); border-radius:8px; 
+                border: 1px solid #E0E0E0; font-size:14px;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.12); width: fit-content;'>
+        <b>Slope Legend (%)</b><br>
+        <div style="display: flex; align-items: center; margin-top: 4px;">
+            <span style='background:#8B0000; width:20px; height: 18px; display:inline-block;'></span>
+            <span style="margin-left: 8px;">≥ 16%</span>
+        </div>
+        <div style="display: flex; align-items: center; margin-top: 4px;">
+            <span style='background:#B22222; width:20px; height: 18px; display:inline-block;'></span>
+            <span style="margin-left: 8px;">12% to 16%</span>
+        </div>
+        <div style="display: flex; align-items: center; margin-top: 4px;">
+            <span style='background:#FF4500; width:20px; height: 18px; display:inline-block;'></span>
+            <span style="margin-left: 8px;">8% to 12%</span>
+        </div>
+        <div style="display: flex; align-items: center; margin-top: 4px;">
+            <span style='background:#FFA500; width:20px; height: 18px; display:inline-block;'></span>
+            <span style="margin-left: 8px;">4% to 8%</span>
+        </div>
+        <div style="display: flex; align-items: center; margin-top: 4px;">
+            <span style='background:#FFFF00; width:20px; height: 18px; display:inline-block;'></span>
+            <span style="margin-left: 8px;">1% to 4%</span>
+        </div>
+        <div style="display: flex; align-items: center; margin-top: 4px;">
+            <span style='background:#E0E0E0; width:20px; height: 18px; display:inline-block;'></span>
+            <span style="margin-left: 8px;">-1% to 1% (Flat)</span>
+        </div>
+        <div style="display: flex; align-items: center; margin-top: 4px;">
+            <span style='background:#ADD8E6; width:20px; height: 18px; display:inline-block;'></span>
+            <span style="margin-left: 8px;">-6% to 0%</span>
+        </div>
+        <div style="display: flex; align-items: center; margin-top: 4px;">
+            <span style='background:#0000FF; width:20px; height: 18px; display:inline-block;'></span>
+            <span style="margin-left: 8px;">-12% to -6%</span>
+        </div>
+        <div style="display: flex; align-items: center; margin-top: 4px;">
+            <span style='background:#0d0887; width:20px; height: 18px; display:inline-block;'></span>
+            <span style="margin-left: 8px;">≤ -12%</span>
+        </div>
     </div>
     """
-    html(legend_html, height=230)
+    html(legend_html, height=310)
