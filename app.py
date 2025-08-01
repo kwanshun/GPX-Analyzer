@@ -23,16 +23,26 @@ st.set_page_config(layout="wide", page_title="GPX Analyzer 📍")
 with st.sidebar:
     st.title("Upload GPX File")
     uploaded_file = st.file_uploader("Choose a GPX file", type=["gpx"])
-    use_example = st.checkbox("Use example GPX file", value=False)
+
+
+    data_dir = "data"
+    example_files = []
+    if os.path.isdir(data_dir):
+        example_files = [f for f in os.listdir(data_dir) if f.endswith('.gpx')]
+
+    options = ["---"] + example_files
+    selected_example = st.selectbox(
+        "Or choose an example from the /data folder:",
+        options
+    )
 
     gpx_data = None
-    if use_example:
-        example_path = os.path.join("data", "example.gpx")
-        if os.path.exists(example_path):
-            with open(example_path, "r", encoding="utf-8") as f:
-                gpx_data = f.read()
-        else:
-            st.error("Missing example file in /data/example.gpx")
+
+    if selected_example != "---":
+        example_path = os.path.join(data_dir, selected_example)
+        with open(example_path, "r", encoding="utf-8") as f:
+            gpx_data = f.read()
+
     elif uploaded_file:
         try:
             gpx_data = uploaded_file.read().decode("utf-8", errors="ignore")
