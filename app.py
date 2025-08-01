@@ -17,7 +17,7 @@ from components.ui.segment_details import show_segment_summary_and_details
 from components.ui.stats_panel import show_stats
 from utils.gps_signal_analysis import run_gps_signal_analysis
 
-st.set_page_config(layout="wide", page_title="GPX Analyzer 📍")
+st.set_page_config(layout="wide", page_title="GPX Analyzer! 📍")
 
 # ───────────────────────── GPX INPUT
 with st.sidebar:
