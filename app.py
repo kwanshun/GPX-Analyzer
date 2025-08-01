@@ -5,7 +5,7 @@ import streamlit as st
 from components.core.climb_detector import detect_significant_segments
 from components.core.gpx_parser import parse_gpx
 from components.core.logging import Timer
-from components.core.utils import classify_climb_category
+from components.core.utils import classify_climb_category_strava
 from components.ui.elevation_chart import (
     get_smoothed_grade,
     update_plot_elevation_colored_by_slope,
@@ -46,6 +46,23 @@ with st.sidebar:
             gpx_data = uploaded_file.read().decode("utf-8", errors="ignore")
         except Exception as e:
             st.error(f"❌ Error decoding GPX: {e}")
+    
+    st.title("Climb Detection Settings")
+    
+    detection_mode = st.select_slider(
+        "Detection Sensitivity",
+        options=["Lenient", "Balanced", "Strict"],
+        value="Balanced",
+        help="Lenient: Detects more, shorter climbs. Strict: Detects only the most significant climbs."
+    )
+
+    # Definimos los parámetros según el modo
+    if detection_mode == "Lenient":
+        params = {"max_pause_length_m": 400, "max_pause_descent_m": 20, "start_threshold_slope": 1.5}
+    elif detection_mode == "Balanced":
+        params = {"max_pause_length_m": 200, "max_pause_descent_m": 10, "start_threshold_slope": 2.0}
+    else: # Strict
+        params = {"max_pause_length_m": 100, "max_pause_descent_m": 5, "start_threshold_slope": 3.0}
 
 
 df_reduced, stats = None, None
@@ -67,14 +84,14 @@ with tab1:
         df_reduced["plot_grade"] = get_smoothed_grade(df_reduced)
         t.log("Calculated and smoothed slope")
 
-        climbs_df = detect_significant_segments(df_reduced, kind="climb")
-        descents_df = detect_significant_segments(df_reduced, kind="descent")
+        climbs_df = detect_significant_segments(df_reduced, kind="climb", **params)
+        descents_df = detect_significant_segments(df_reduced, kind="descent", **params)
         t.log("Detected climbs and descents")
 
         for seg_df, is_climb in [(climbs_df, True), (descents_df, False)]:
             if not seg_df.empty:
                 seg_df["category"] = seg_df.apply(
-                    lambda row: classify_climb_category(
+                    lambda row: classify_climb_category_strava(
                         row["length_m"], abs(row["avg_slope"])
                     ),
                     axis=1,

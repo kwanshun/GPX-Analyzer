@@ -17,9 +17,14 @@ def get_color(grade):
 
 def apply_slope_smoothing(df, target_meters=300):
     meters_per_point = df["distance"].iloc[-1] / len(df)
+    # Evitar una ventana demasiado grande o demasiado pequeña
+    if meters_per_point == 0: return df # No se puede calcular
     window = max(3, int(target_meters / meters_per_point))
+    # Asegurarse de que la ventana sea un número impar para que el centro sea claro
+    if window % 2 == 0: window += 1
+    
     df["plot_grade"] = (
-        df["grade"].rolling(window=window, center=True).mean().bfill().ffill()
+        df["grade"].rolling(window=window, center=True, min_periods=1).mean()
     )
     return df
 
@@ -40,5 +45,29 @@ def classify_climb_category(length_m, avg_slope):
         return "Category 5"
     elif length_km >= 0.5 and avg_slope >= 1:
         return "Category 6"
+    else:
+        return "Uncategorized"
+
+
+def classify_climb_category_strava(length_m, avg_slope):
+    """
+    Clasifica una subida usando un sistema de puntuación similar al de Strava.
+    Puntuación = Longitud (metros) * Pendiente (%)
+    """
+    if length_m <= 0 or avg_slope < 3.0:
+        return "Uncategorized"
+
+    score = length_m * avg_slope
+
+    if score >= 80000:
+        return "HC (Hors Catégorie)"
+    elif score >= 64000:
+        return "Cat 1"
+    elif score >= 32000:
+        return "Cat 2"
+    elif score >= 16000:
+        return "Cat 3"
+    elif score >= 8000:
+        return "Cat 4"
     else:
         return "Uncategorized"
