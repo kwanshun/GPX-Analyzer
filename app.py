@@ -5,7 +5,7 @@ import streamlit as st
 from components.core.climb_detector import detect_significant_segments
 from components.core.gpx_parser import parse_gpx
 from components.core.logging import Timer
-from components.core.utils import classify_climb_category
+from components.core.utils import classify_climb_category_strava
 from components.ui.elevation_chart import (
     get_smoothed_grade,
     update_plot_elevation_colored_by_slope,
@@ -23,23 +23,47 @@ st.set_page_config(layout="wide", page_title="GPX Analyzer 📍")
 with st.sidebar:
     st.title("Upload GPX File")
     uploaded_file = st.file_uploader("Choose a GPX file", type=["gpx"])
-    use_example = st.checkbox("Use example GPX file", value=False)
 
+
+    data_dir = "data"
+    example_files = []
+    if os.path.isdir(data_dir):
+        example_files = [f for f in os.listdir(data_dir) if f.endswith('.gpx')]
+
+    options = ["---"] + example_files
+    selected_example = st.selectbox(
+        "Or choose an example from the /data folder:",
+        options
+    )
     gpx_data = None
-    if use_example:
-        example_path = os.path.join("data", "example.gpx")
-        if os.path.exists(example_path):
-            with open(example_path, "r", encoding="utf-8") as f:
-                gpx_data = f.read()
-        else:
-            st.error("Missing example file in /data/example.gpx")
+    if selected_example != "---":
+        example_path = os.path.join(data_dir, selected_example)
+        with open(example_path, "r", encoding="utf-8") as f:
+            gpx_data = f.read()
+
     elif uploaded_file:
         try:
             gpx_data = uploaded_file.read().decode("utf-8", errors="ignore")
         except Exception as e:
             st.error(f"❌ Error decoding GPX: {e}")
+    
+    st.title("Climb Detection Settings")
+    
+    detection_mode = st.select_slider(
+        "Detection Sensitivity",
+        options=["Lenient", "Balanced", "Strict"],
+        value="Balanced",
+        help="Lenient: Detects more, shorter climbs. Strict: Detects only the most significant climbs."
+    )
 
-# Parse and reduce only once
+    if detection_mode == "Lenient":
+        params = {"max_pause_length_m": 400, "max_pause_descent_m": 20, "start_threshold_slope": 1.5}
+    elif detection_mode == "Balanced":
+        params = {"max_pause_length_m": 200, "max_pause_descent_m": 10, "start_threshold_slope": 2.0}
+    else: # Strict
+        params = {"max_pause_length_m": 100, "max_pause_descent_m": 5, "start_threshold_slope": 3.0}
+
+
 df_reduced, stats = None, None
 if gpx_data:
     try:
@@ -59,14 +83,14 @@ with tab1:
         df_reduced["plot_grade"] = get_smoothed_grade(df_reduced)
         t.log("Calculated and smoothed slope")
 
-        climbs_df = detect_significant_segments(df_reduced, kind="climb")
-        descents_df = detect_significant_segments(df_reduced, kind="descent")
+        climbs_df = detect_significant_segments(df_reduced, kind="climb", **params)
+        descents_df = detect_significant_segments(df_reduced, kind="descent", **params)
         t.log("Detected climbs and descents")
 
         for seg_df, is_climb in [(climbs_df, True), (descents_df, False)]:
             if not seg_df.empty:
                 seg_df["category"] = seg_df.apply(
-                    lambda row: classify_climb_category(
+                    lambda row: classify_climb_category_strava(
                         row["length_m"], abs(row["avg_slope"])
                     ),
                     axis=1,
@@ -101,12 +125,33 @@ with tab1:
 
         with col2:
             st.subheader("📈 Elevation Profile")
+            col_a, col_b = st.columns(2)
+            with col_a:
+                show_markers = st.checkbox(
+                    "Show segment markers", 
+                    value=True,
+                    help="Show or hide the vertical dashed lines for climbs/descents."
+                )
+            with col_b:
+                color_mode = st.radio(
+                    "Profile Coloring Style",
+                    ["Detailed Slope", "Average per Segment"],
+                    horizontal=True,
+                    help="Choose 'Detailed' to see slope variations or 'Average' for a single color per segment."
+                )
+                
+            show_markers = st.checkbox(
+                "Show climb/descent markers on profile", 
+                value=True,
+                help="Show or hide the vertical dashed lines that mark the start and end of detected segments."
+            )
             update_plot_elevation_colored_by_slope(
                 df_reduced,
                 climbs_df=climbs_df,
                 descents_df=descents_df,
                 color_by_slope=True,
                 simplified=False,
+                show_markers=show_markers
             )
             t.log("Rendered elevation chart")
             st.subheader("📊 Statistics")

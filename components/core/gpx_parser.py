@@ -1,9 +1,28 @@
 import gpxpy
 import numpy as np
 import pandas as pd
-from geopy.distance import geodesic
+from haversine import haversine_vector, Unit 
 
 from .stats import compute_gpx_stats
+
+
+def _add_distance_and_grade(df):
+    """
+    Calcula de forma vectorizada la distancia, distancia acumulada y pendiente.
+    Modifica el DataFrame de entrada añadiendo estas columnas.
+    """
+    coords = df[["lat", "lon"]].to_numpy()
+
+    distances_segment = np.zeros(len(df))
+    distances_segment[1:] = haversine_vector(coords[:-1], coords[1:], unit=Unit.METERS)
+
+    df["distance"] = np.cumsum(distances_segment)
+
+    elev_diff = np.diff(df["ele"], prepend=df["ele"].iloc[0])
+    with np.errstate(divide="ignore", invalid="ignore"):
+        df["grade"] = np.where(distances_segment > 0, (elev_diff / distances_segment) * 100, 0)
+    
+    return df
 
 
 def parse_gpx(gpx_content, max_points_per_km=20):
@@ -26,42 +45,28 @@ def parse_gpx(gpx_content, max_points_per_km=20):
     if len(df) < 2:
         raise ValueError("GPX file too short")
 
-    coords = df[["lat", "lon"]].to_numpy()
-    distances = np.array(
-        [
-            geodesic(coords[i - 1], coords[i]).meters if i > 0 else 0
-            for i in range(len(coords))
-        ]
-    )
-    df["distance"] = np.cumsum(distances)
+    df = _add_distance_and_grade(df)
 
     df = reduce_points_by_density(df, max_points_per_km)
 
-    # Recompute distances after reduction
-    coords = df[["lat", "lon"]].to_numpy()
-    distances = np.array(
-        [
-            geodesic(coords[i - 1], coords[i]).meters if i > 0 else 0
-            for i in range(len(coords))
-        ]
-    )
-    df["distance"] = np.cumsum(distances)
-
-    elev_diff = np.diff(df["ele"], prepend=df["ele"].iloc[0])
-    with np.errstate(divide="ignore", invalid="ignore"):
-        df["grade"] = np.where(distances > 0, (elev_diff / distances) * 100, 0)
+    df = _add_distance_and_grade(df)
 
     time_deltas = pd.to_datetime(df["time"]).diff().dt.total_seconds().fillna(0)
-    df["duration_sec"] = np.where(time_deltas < 3600, time_deltas, 0)  # filtra outliers
+    df["duration_sec"] = np.where(time_deltas < 3600, time_deltas, 0)
 
     stats = compute_gpx_stats(df)
     return df, stats
 
 
 def reduce_points_by_density(df, max_points_per_km):
+
     total_km = df["distance"].iloc[-1] / 1000
-    max_points = int(total_km * max_points_per_km)
-    if len(df) <= max_points:
+    if total_km == 0:
         return df
+
+    max_points = int(total_km * max_points_per_km)
+    if len(df) <= max_points or max_points == 0:
+        return df
+        
     step = max(1, len(df) // max_points)
     return df.iloc[::step].reset_index(drop=True)

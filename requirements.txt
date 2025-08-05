@@ -9,3 +9,4 @@ pandas==2.3.1
 scikit-learn==1.7.1
 streamlit==1.47.1
 streamlit-folium==0.25.1
+haversine==2.8.0
