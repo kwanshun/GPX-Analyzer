@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import streamlit as st
 
 
-def show_segment_summary_and_details(df, full_df, kind="climb"):
+def show_segment_summary_and_details(df, full_df, kind: str = "climb") -> None:
     if df.empty:
         st.info(f"No {kind}s detected.")
         return

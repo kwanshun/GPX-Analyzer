@@ -1,7 +1,7 @@
 import streamlit as st
 
 
-def show_stats(stats):
+def show_stats(stats) -> None:
     st.markdown(
         f"""
     **Total Distance:** {stats["total_distance_km"]:.2f} km  

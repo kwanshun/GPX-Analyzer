@@ -1,7 +1,8 @@
 # components/ui/legend.py
 from streamlit.components.v1 import html
 
-def display_legend():
+
+def display_legend() -> None:
     legend_html = """
     <div style='padding:10px; background-color:rgba(255,255,255,0.8); border-radius:8px; 
                 border: 1px solid #E0E0E0; font-size:14px;

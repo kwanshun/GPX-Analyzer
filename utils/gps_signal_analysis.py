@@ -1,17 +1,17 @@
+import altair as alt
+import branca.colormap as cm
+import folium
+import numpy as np
 import pandas as pd
 import requests
-import folium
+import streamlit as st
 from folium.plugins import HeatMap
 from geopy.distance import geodesic
-import branca.colormap as cm
-from streamlit_folium import st_folium
-import streamlit as st
-import altair as alt
 from sklearn.neighbors import BallTree
-import numpy as np
+from streamlit_folium import st_folium
 
 
-def run_gps_signal_analysis(df, radius=10):
+def run_gps_signal_analysis(df, radius: int = 10) -> None:
     st.title("📡 GPS Signal Quality Analyzer")
 
     if df.empty:

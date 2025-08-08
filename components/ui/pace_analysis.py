@@ -7,7 +7,7 @@ from geopy.distance import geodesic
 from streamlit_folium import st_folium
 
 
-def run_pace_analysis(df):
+def run_pace_analysis(df) -> None:
     st.title("🏃‍♂️ Pace & Speed Analyzer")
 
     if (

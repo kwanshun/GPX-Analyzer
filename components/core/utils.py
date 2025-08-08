@@ -1,6 +1,7 @@
 import numpy as np
 
-def get_color(grade):
+
+def get_color(grade) -> str:
     if grade >= 18:
         return "#8B0000"  # Dark Red
     elif grade >= 10:
@@ -15,6 +16,7 @@ def get_color(grade):
         return "#0000FF"  # Blue
     else:
         return "#00008B"  # Dark Blue
+
 
 def get_color_from_palette(grade):
     """
@@ -32,32 +34,33 @@ def get_color_from_palette(grade):
         "#FFA500",  # Naranja (Subida 4-8%)
         "#FF4500",  # Rojo-Naranja (Subida 8-12%)
         "#B22222",  # Ladrillo (Subida 12-16%)
-        "#8B0000"   # Rojo Oscuro (Subida > 16%)
+        "#8B0000",  # Rojo Oscuro (Subida > 16%)
     ]
     grade_bins = np.array([-15, -8, -3, -1, 1, 4, 8, 12, 20])
     idx = np.interp(grade, grade_bins, range(len(palette)))
-    
 
     color_idx = int(round(idx))
-    
+
     return palette[color_idx]
 
 
-def apply_slope_smoothing(df, target_meters=300):
+def apply_slope_smoothing(df, target_meters: int = 300):
     meters_per_point = df["distance"].iloc[-1] / len(df)
     # Evitar una ventana demasiado grande o demasiado pequeña
-    if meters_per_point == 0: return df # No se puede calcular
+    if meters_per_point == 0:
+        return df  # No se puede calcular
     window = max(3, int(target_meters / meters_per_point))
     # Asegurarse de que la ventana sea un número impar para que el centro sea claro
-    if window % 2 == 0: window += 1
-    
+    if window % 2 == 0:
+        window += 1
+
     df["plot_grade"] = (
         df["grade"].rolling(window=window, center=True, min_periods=1).mean()
     )
     return df
 
 
-def classify_climb_category(length_m, avg_slope):
+def classify_climb_category(length_m, avg_slope) -> str:
     length_km = length_m / 1000
     if length_km >= 10 and avg_slope >= 6:
         return "Hors Catégorie"
@@ -77,7 +80,7 @@ def classify_climb_category(length_m, avg_slope):
         return "Uncategorized"
 
 
-def classify_climb_category_strava(length_m, avg_slope):
+def classify_climb_category_strava(length_m, avg_slope) -> str:
     """
     Clasifica una subida usando un sistema de puntuación similar al de Strava.
     Puntuación = Longitud (metros) * Pendiente (%)

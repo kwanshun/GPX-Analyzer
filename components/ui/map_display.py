@@ -7,11 +7,11 @@ from components.ui.elevation_chart import get_smoothed_grade
 
 def update_display_route_map(
     df,
-    tile_style="OpenStreetMap",
+    tile_style: str = "OpenStreetMap",
     climbs_df=None,
     descents_df=None,
-    color_by_slope=True,
-):
+    color_by_slope: bool = True,
+) -> None:
     df["plot_grade"] = get_smoothed_grade(df)
     coords = df[["lat", "lon"]].values.tolist()
 

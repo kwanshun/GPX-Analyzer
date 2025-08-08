@@ -1,7 +1,7 @@
 import gpxpy
 import numpy as np
 import pandas as pd
-from haversine import haversine_vector, Unit 
+from haversine import Unit, haversine_vector
 
 from .stats import compute_gpx_stats
 
@@ -20,12 +20,14 @@ def _add_distance_and_grade(df):
 
     elev_diff = np.diff(df["ele"], prepend=df["ele"].iloc[0])
     with np.errstate(divide="ignore", invalid="ignore"):
-        df["grade"] = np.where(distances_segment > 0, (elev_diff / distances_segment) * 100, 0)
-    
+        df["grade"] = np.where(
+            distances_segment > 0, (elev_diff / distances_segment) * 100, 0
+        )
+
     return df
 
 
-def parse_gpx(gpx_content, max_points_per_km=20):
+def parse_gpx(gpx_content, max_points_per_km: int = 20):
     gpx = gpxpy.parse(gpx_content)
     data = []
 
@@ -59,7 +61,6 @@ def parse_gpx(gpx_content, max_points_per_km=20):
 
 
 def reduce_points_by_density(df, max_points_per_km):
-
     total_km = df["distance"].iloc[-1] / 1000
     if total_km == 0:
         return df
@@ -67,6 +68,6 @@ def reduce_points_by_density(df, max_points_per_km):
     max_points = int(total_km * max_points_per_km)
     if len(df) <= max_points or max_points == 0:
         return df
-        
+
     step = max(1, len(df) // max_points)
     return df.iloc[::step].reset_index(drop=True)
