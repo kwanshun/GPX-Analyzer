@@ -1,7 +1,7 @@
 import gpxpy
 import numpy as np
 import pandas as pd
-from haversine import haversine_vector, Unit
+from haversine import Unit, haversine_vector
 
 from .stats import compute_gpx_stats
 
