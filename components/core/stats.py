@@ -23,7 +23,7 @@ def compute_gpx_stats(df):
         "num_points": num_points,
         "point_density_km": density_per_km,
         "point_density_100m": density_per_100m,
-        "precision_score": min(100.0, (density_per_km / 20) * 100)
+        "precision_score": min(100.0, (density_per_km / 20) * 100),
     }
 
     return stats

@@ -1,7 +1,0 @@
----- GPX Analyzer Execution Log ----
-[TIME] Calculated and smoothed slope: 0.006 s
-[TIME] Detected climbs and descents: 0.057 s
-[TIME] Categorized and enriched segments: 0.001 s
-[TIME] Rendered map: 0.618 s
-[TIME] Rendered elevation chart: 1.700 s
-[TIME] Rendered stats panel: 0.004 s
