@@ -41,7 +41,8 @@ def show_segment_summary_and_details(df, full_df, kind="climb"):
             if "plot_grade" in full_df.columns:
                 # Extract segment data
                 segment_df = full_df.iloc[int(row["start_idx"]):int(row["end_idx"]) + 1]
-
+                st.write(segment_df.columns)
+                st.write("Segment DataFrame columns:", list(segment_df.columns))
                 # Create two plots side-by-side, slightly taller to fit colorbar
                 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
 
