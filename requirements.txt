@@ -6,7 +6,7 @@ gpxpy==1.6.2
 matplotlib==3.10.6
 numpy==2.3.3
 pandas==2.3.2
-scikit-learn==1.7.1
+scikit-learn==1.7.2
 streamlit==1.49.1
 streamlit-folium==0.25.1
 haversine==2.9.0
